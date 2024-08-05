@@ -1,4 +1,5 @@
 import { environment } from "@raycast/api";
+import { execSync } from "child_process";
 import { runAppleScript } from "run-applescript";
 
 function sliceIntoChunks(arr: Array<string>, chunkSize: number): Array<Array<string>> {
@@ -11,6 +12,7 @@ function sliceIntoChunks(arr: Array<string>, chunkSize: number): Array<Array<str
 }
 
 export async function getOutputDevices() {
+  console.log(" Helooooooo");
   const stringList = await runAppleScript(`
     set devices to {}
 
@@ -47,15 +49,27 @@ export async function getOutputDevices() {
   `);
 
   const list = stringList.split(", ");
-
   const currentOutputSeparator = list.indexOf("currentOutput");
   const currentOutput = list[currentOutputSeparator + 1];
 
-  return sliceIntoChunks(list.slice(0, currentOutputSeparator), 2).map(([name, type]) => ({
+  const localDevices = sliceIntoChunks(list.slice(0, currentOutputSeparator), 2).map(([name, type]) => ({
     name,
     type,
     selected: name === currentOutput,
   }));
+
+  // Run the Swift script to get AirPlay devices
+  const airPlayDevicesJson = execSync("./airplay_devices").toString();
+  const airPlayDevices = JSON.parse(airPlayDevicesJson);
+  
+  // Combine the local and AirPlay devices
+  const allDevices = [
+    ...localDevices,
+    ...airPlayDevices,
+    // ...airPlayDevices["AirPlay Devices"].map((name: string) => ({ name, type: "AirPlay", selected: false })),
+    ];
+    
+  return allDevices;
 }
 
 export async function setOutputDevice(item: string) {

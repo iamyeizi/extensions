@@ -9,5 +9,6 @@ interface Context {
 export default function Command({ launchContext }: { launchContext?: Context }) {
   const preferences = getPreferenceValues();
 
-  return preferences.airplay ? <AirPlaySelector /> : <DeviceList deviceId={launchContext?.deviceId} type="output" />;
+  // return preferences.airplay ? <AirPlaySelector /> : <DeviceList deviceId={launchContext?.deviceId} type="output" />;
+  return <DeviceList deviceId={launchContext?.deviceId} type="output" />;
 }
